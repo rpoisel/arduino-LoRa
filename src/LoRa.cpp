@@ -70,7 +70,8 @@ LoRaClass::LoRaClass() :
   _frequency(0),
   _packetIndex(0),
   _implicitHeaderMode(0),
-  _onReceive(NULL)
+  _onReceive(nullptr),
+  _onReceiveContext(nullptr)
 {
   // overide Stream timeout value
   setTimeout(0);
@@ -347,9 +348,10 @@ void LoRaClass::flush()
 }
 
 #ifndef ARDUINO_SAMD_MKRWAN1300
-void LoRaClass::onReceive(void(*callback)(int))
+void LoRaClass::onReceive(OnReceiveCb callback, void* context)
 {
   _onReceive = callback;
+  _onReceiveContext = context;
 
   if (callback) {
     pinMode(_dio0, INPUT);
@@ -650,7 +652,7 @@ void LoRaClass::handleDio0Rise()
     writeRegister(REG_FIFO_ADDR_PTR, readRegister(REG_FIFO_RX_CURRENT_ADDR));
 
     if (_onReceive) {
-      _onReceive(packetLength);
+      _onReceive(_onReceiveContext, packetLength);
     }
   }
 }

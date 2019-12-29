@@ -30,6 +30,8 @@
 #define PA_OUTPUT_RFO_PIN          0
 #define PA_OUTPUT_PA_BOOST_PIN     1
 
+using OnReceiveCb = void (*)(void*, int);
+
 class LoRaClass : public Stream {
 public:
   LoRaClass();
@@ -56,7 +58,7 @@ public:
   virtual void flush();
 
 #ifndef ARDUINO_SAMD_MKRWAN1300
-  void onReceive(void(*callback)(int));
+  void onReceive(OnReceiveCb callback, void* context = nullptr);
 
   void receive(int size = 0);
 #endif
@@ -116,7 +118,8 @@ private:
   long _frequency;
   int _packetIndex;
   int _implicitHeaderMode;
-  void (*_onReceive)(int);
+  OnReceiveCb _onReceive;
+  void* _onReceiveContext;
 };
 
 extern LoRaClass LoRa;
